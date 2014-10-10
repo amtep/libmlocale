@@ -108,6 +108,9 @@ private slots:
     void testMLocaleIndexBucket_data();
     void testMLocaleIndexBucket();
 
+    void testMLocaleIndexBucketSpeed_data();
+    void testMLocaleIndexBucketSpeed();
+
     void testDifferentStrengthComparison_data();
     void testDifferentStrengthComparison();
 

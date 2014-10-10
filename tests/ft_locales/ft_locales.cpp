@@ -3994,6 +3994,48 @@ void Ft_Locales::testMLocaleIndexBucket()
     }
 }
 
+void Ft_Locales::testMLocaleIndexBucketSpeed_data()
+{
+    QTest::addColumn<QString>("localeName");
+    QTest::addColumn<QString>("lcCollate");
+    QTest::addColumn<QString>("str");
+    QTest::addColumn<QString>("expectedBucket");
+
+    QTest::newRow("en_US")
+        << "en_US"
+        << "en_US"
+        << "Lacey"
+        << "L";
+
+    QTest::newRow("zh_TW@collation=stroke")
+        << "ja_JP"
+        << "zh_TW@collation=stroke"
+        << "冬" // dong1, 5 strokes, 1st stroke down to left U+51AC
+        << "5劃";
+
+   QTest::newRow("ko_KR@collation=standard")
+        << "ja_JP"
+        << "ko_KR@collation=standard"
+        << "山" // Korean Pronunciation: SAN
+        << "ᄉ"; // U+1109 HANGUL CHOSEONG SIOS
+}
+
+void Ft_Locales::testMLocaleIndexBucketSpeed()
+{
+    QFETCH(QString, localeName);
+    QFETCH(QString, lcCollate);
+    QFETCH(QString, str);
+    QFETCH(QString, expectedBucket);
+
+    MLocale locale(localeName);
+    locale.setCategoryLocale(MLocale::MLcCollate, lcCollate);
+    locale.indexBucket(str); // give the MLocale a chance to do setup
+
+    QBENCHMARK {
+        QCOMPARE(locale.indexBucket(str), expectedBucket);
+    }
+}
+
 void Ft_Locales::testDifferentStrengthComparison_data()
 {
     QTest::addColumn<QString>("localeName");
