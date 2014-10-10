@@ -160,6 +160,7 @@ public:
                                       MLocale::TimeType timeType,
                                       MLocale::CalendarType calendarType,
                                       MLocale::TimeFormat24h timeFormat24h) const;
+    MCollator &bucketCollator() const;
 #endif
     QString fixCategoryNameForNumbers(const QString &categoryName) const;
     QString numberingSystem(const QString &localeName) const;
@@ -233,9 +234,10 @@ public:
     MLocaleAbstractConfigItem *pCurrentLcMonetary;
     MLocaleAbstractConfigItem *pCurrentLcTelephone;
 
-    // calendar instance used formatDateTimeICU()
 #ifdef HAVE_ICU
+    // calendar instance used formatDateTimeICU()
     MCalendar *_pDateTimeCalendar;
+    mutable MCollator *_pBucketCollator;
 #endif
 
     MLocale *q_ptr;

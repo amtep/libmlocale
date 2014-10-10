@@ -1014,6 +1014,7 @@ MLocalePrivate::MLocalePrivate()
       pCurrentLcTelephone(0),
 #ifdef HAVE_ICU
       _pDateTimeCalendar(0),
+      _pBucketCollator(0),
 #endif
       q_ptr(0)
 {
@@ -1072,6 +1073,7 @@ MLocalePrivate::MLocalePrivate(const MLocalePrivate &other)
 
 #ifdef HAVE_ICU
       _pDateTimeCalendar(0),
+      _pBucketCollator(0),
 #endif
       q_ptr(0)
 {
@@ -1095,6 +1097,7 @@ MLocalePrivate::~MLocalePrivate()
 
     delete _pDateTimeCalendar;
     _pDateTimeCalendar = 0;
+    delete _pBucketCollator;
 #endif
 
     delete pCurrentLanguage;
@@ -1155,6 +1158,11 @@ void MLocalePrivate::dropCaches()
     {
         delete _pDateTimeCalendar;
         _pDateTimeCalendar = 0;
+    }
+
+    if (_pBucketCollator) {
+        delete _pBucketCollator;
+        _pBucketCollator = 0;
     }
 
     // drop cached formatString conversions
@@ -2748,6 +2756,21 @@ float MLocale::toFloat(const QString &s, bool *ok) const
 }
 
 #ifdef HAVE_ICU
+// This function returns a reference because copying MCollator
+// is expensive.
+MCollator &MLocalePrivate::bucketCollator() const
+{
+    Q_Q(const MLocale);
+    if (!_pBucketCollator) {
+        _pBucketCollator = new MCollator(*q);
+        // This what makes this collator different from q->collator()
+        _pBucketCollator->setStrength(MLocale::CollatorStrengthPrimary);
+    }
+    return *_pBucketCollator;
+}
+#endif
+
+#ifdef HAVE_ICU
 void MLocalePrivate::removeDirectionalFormattingCodes(QString *str) const
 {
     str->remove(QChar(0x200F)); // RIGHT-TO-LEFT MARK
@@ -4032,9 +4055,9 @@ QString MLocale::indexBucket(const QString &str, const QStringList &buckets, con
 #ifdef HAVE_ICU
 QString MLocale::indexBucket(const QString &str) const
 {
+    Q_D(const MLocale);
     QStringList bucketList = exemplarCharactersIndex();
-    MCollator coll = this->collator();
-    coll.setStrength(MLocale::CollatorStrengthPrimary);
+    const MCollator &coll = d->bucketCollator();
     return indexBucket(str, bucketList, coll);
 }
 #endif
