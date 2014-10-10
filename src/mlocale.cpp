@@ -4055,6 +4055,7 @@ QString MLocale::indexBucket(const QString &str, const QStringList &buckets, con
 #ifdef HAVE_ICU
 QString MLocale::indexBucket(const QString &str) const
 {
+    qDebug() << str;
     Q_D(const MLocale);
     QStringList bucketList = exemplarCharactersIndex();
     const MCollator &coll = d->bucketCollator();
